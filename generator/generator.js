@@ -9,27 +9,27 @@ var svg=d3.select("body")
 			.attr("width", width)
 			.attr("height", height);
 
-var lines=[[80,80],[200,100],[200,200],[100,200]];
-var lines=[80,120,160,200,240,280];
-var linePath=d3.svg.line()
-				.interpolate("linear")//直線
-			  /*.interpolate("linear-closed")//直线闭合
-				 .interpolate("basis")
-				.interpolate("cardinal")*/
-				.x(function(d){
-					return d;
-				})
-				.y(function(d,i){
-					return i%2 ==0 ?40:120;
-				})
-				/*.defined(function(d){
-					return d<200;    //绘制返回为true的数据
-				});*/
 
-				svg.append("path")
-					.attr("d",linePath(lines))
-					.attr("stroke","black")
-					.attr("stroke-width","3px")
-					.attr("fill","none");
+/*区域生成器*/
+var dataset=[80,120,130,70,60,90];
+
+var areaPath=d3.svg.area()
+				.interpolate("basis")
+				.interpolate("cardinal")
+				.interpolate("step")
+				.x(function(d,i){
+					return 50+i*80;
+				})
+				.y0(function(d,i){
+					return height/2;
+				})
+				.y1(function(d,i){
+					return height/2-d;
+				});
 
 	
+svg.append("path")
+	.attr("d",areaPath(dataset))
+	.attr("stroke","#000")
+	.attr("stroke-width","3px")
+	.attr("fill","yellow");

@@ -8,61 +8,54 @@ var svg=d3.select("body")
 			.attr("id","main")
 			.attr("width", width)
 			.attr("height", height);
+/*符号生成器*/
 
 
-/*弧生成器*/
-
-/**
- * 起始角度 startAngle
- * 终止角度 endAngle
- * 内半径 innerRadius
- * 外半径 outerRadius
+/*
+*d3.svg.symbol 创建符号生成器
+* 	-symbol 返回指定符号断点路径字符串
+* 	- symbol.type 设置或获取符号类型
+* 	- symbol.size 设置或获取符号大小，单位为像素的平方
+* 	- d3.svg.symbolTypes 支持符号的类型
  */
 
 
-var dataset=[
-			{
-				startAngle:0,
-				endAngle:Math.PI*0.75
-			},
-			{
-				startAngle:Math.PI*0.75,
-				endAngle:Math.PI*1
-			}
-			];
+console.log(d3.svg.symbolTypes);
+
+var n=30;
+var dataset=[];
+
+for(var i=0;i<n;i++){
+	dataset.push({
+		size:Math.random()*30+200,
+		type:d3.svg.symbolTypes[Math.floor(Math.random()*d3.svg.symbolTypes.length)]
+	});
+}
+
+var symbol=d3.svg.symbol()
+				.size(function(d){
+					return d.size;
+				})
+				.type(function(d){
+					return d.type;
+				});
 
 
-var color=d3.scale.category10();
-var arcPath=d3.svg.arc()
-				.innerRadius(0)
-				.outerRadius(100);
-	svg.selectAll("path")
-		.data(dataset)
-		.enter()
-		.append("path")
-		.attr("d",function(d,i){
-			return arcPath(d);
-		})
-		.attr("transform","translate(250,250)")
-		.attr("stroke-width","3px")
-		.attr("stroke","#000")
-		.attr("fill",function(d,i){
-			return color(i);
-		});	
 
-/*给每段弧线添加文字*/
+var color=d3.scale.category20();
 
-svg.selectAll("text")
+svg.selectAll("path")
 	.data(dataset)
 	.enter()
-	.append("text")
-	.attr("transform",function(d,i){
-		return "translate(250,250)"+
-			"translate("+arcPath.centroid(d)+")";
+	.append("path")
+	.attr("d",function(d){
+		return symbol(d);
 	})
-	.attr("text-anchor","middle")
-	.attr("fill","#fff")
-	.attr("font-size","18px")
-	.text(function(d,i){
-		return Math.floor((d.endAngle-d.startAngle)*180/Math.PI)+"'";
+	.attr("transform",function(d,i){
+			var x=100+i%5*20;
+			var y=100+Math.floor(i/5)*20;
+			return 'translate('+x+","+y+')';
+	})
+	.attr("fill",function(d,i){
+		return color(i);
 	});

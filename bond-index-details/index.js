@@ -114,7 +114,7 @@ var context = svg.append("g")
 
 
 var toolTips=svg.append("g")
-                .attr("class","toolTips")
+                .attr("class","toolTips");
              
 
 
@@ -251,7 +251,6 @@ svg.append("rect")
   .attr("height",height)
   .attr("fill","rgba(0,0,0,0)")
   .on("mouseover",function(){
-  
       toolTips.style("display",null);
   })
   .on("mouseout",function(){

@@ -12,12 +12,7 @@ var svg=d3.select("body")
 
 
 
-
-
-var dataset=[
-				{
-					country:"china",
-					gdp:[
+var data=[
 						[2000,11920],
 						[2001,13170],
 						[2002,14170],
@@ -32,26 +27,50 @@ var dataset=[
 						[2011,73417],
 						[2012,83417],
 						[2013,100417]
-					]
+					];
+
+	data=_.object(data);
+	var year=_.keys(data);
+	var value=_.values(data);
+
+
+
+
+
+console.log(_.zip(year,_.shuffle(value)))
+
+var dataset=[
+				{
+					country:"china",
+					gdp:_.zip(year,_.shuffle(value))
 				},
 				{
 					country:"japan",
-					gdp:[
-						[2000,11920],
-						[2001,23170],
-						[2002,34170],
-						[2003,16170],
-						[2004,39170],
-						[2005,52170],
-						[2006,97170],
-						[2007,105170],
-						[2008,85170],
-						[2009,71170],
-						[2010,59417],
-						[2011,63417],
-						[2012,83417],
-						[2013,100417]
-					]
+					gdp:_.zip(year,_.shuffle(value))
+				},
+				{
+					country:"chi1na",
+					gdp:_.zip(year,_.shuffle(value))
+				},
+				{
+					country:"jap2an",
+					gdp:_.zip(year,_.shuffle(value))
+				},
+				{
+					country:"c3hina",
+					gdp:_.zip(year,_.shuffle(value))
+				},
+				{
+					country:"ja4pan",
+					gdp:_.zip(year,_.shuffle(value))
+				},
+				{
+					country:"ch5ina",
+					gdp:_.zip(year,_.shuffle(value))
+				},
+				{
+					country:"ja6pan",
+					gdp:_.zip(year,_.shuffle(value))
 				}
 		];
 	
@@ -113,7 +132,7 @@ var linePath=d3.svg.line()
 
 var shapePath=d3.svg.line();
 
-var color=[d3.rgb(255,0,0),d3.rgb(0,255,0)];
+var color=d3.scale.category10();
 
 
 var linesGroup=svg.selectAll("g")
@@ -133,7 +152,7 @@ var lines=linesGroup
 	.attr("fill","none")
 	.attr("stroke-width",2)
 	.attr("stroke",function(d,i){
-		return color[i];
+		return color(i);
 	});
 
 	//焦点元素	
@@ -154,7 +173,7 @@ var focusTooltips=linesGroup.append("g")
 					.style("display","none");
 var focusTooltipsShape=focusTooltips.append("path")
 				 .attr("fill",function(d,i){
-				 	return color[i];
+				 	return color(i);
 				 });
 	
 var focusTooltipsText=focusTooltips.append("text")
@@ -328,12 +347,13 @@ focusCircle.attr("transform",function(d,i){
 
 })
 .attr("fill",function(d,i){
-	return color[i];
+	return color(i);
 });
 
 
 
 var adjust=[];
+var t=[];
 
 focusTooltipsShape.each(function(d,i,a){
 var data=d.gdp;
@@ -346,7 +366,9 @@ var data=d.gdp;
 	var y1=data[index][1];
 	var focusX=xScale(x1)+padding.left;
 	var focusY=yScale(y1)+padding.top;
-	adjust.push([focusX,focusY,focusY]);
+
+	adjust.push([focusX,focusY,i,focusX,focusY]);
+	
 
 });
 
@@ -354,36 +376,162 @@ var data=d.gdp;
 
 
 
-_.each(adjust,function(e,i,all){
+var allH=40*adjust.length;
+var chartH=height-100;
 
-    if(i==(all.length-1)){
-      return;
-    }
+adjust=_.sortBy(adjust,function(d){return d[1]});
 
-    if(Math.abs((all[i+1][1]-all[i][1]))<focusTooltipsHeight+focusTooltipsGap){
-        all[i+1][1]=all[i][1]+focusTooltipsHeight+focusTooltipsGap;
-    }
+console.log(adjust)
+
+var maxP=_.max(_.map(adjust,function(d){return d[1];}));
+var minP=_.min(_.map(adjust,function(d){return d[1];}));
 
 
-});
+
+if(allH>chartH){
+	console.log("从位置0开始排列");
+}else{
+
+var cH=maxP-minP;
+
+		if(cH>allH){
+			console.log("从计算最高点开始排列");
+
+
+		/*	var startP=adjust[0][1];
+			adjust=_.map(adjust,function(d,i){
+					d[1]=startP+i*45;
+					return d;
+				});	*/
+
+
+			adjust=_.each(adjust.reverse(),function(d,i,all){
+					
+					if(i==(all.length-1)){
+						return;
+					}	
+
+					if(all[0][1]<(height-50)){
+						all[0][1]=height-72.50;
+					}
+
+					if((all[i][1]-all[i+1][1])<45){
+						all[i+1][1]=all[i][1]-45;
+					}
+
+
+					
+				});
+			adjust=_.each(adjust.reverse(),function(d,i,all){
+					
+					if(i==(all.length-1)){
+						return;
+					}
+
+					if(all[0][1]<50){
+						all[0][1]=72.50;
+					}
+
+					if((all[i+1][1]-all[i][1])<45){
+						all[i+1][1]=all[i][1]+45;
+					}
+					
+				});
+
+
+		}else{
+			console.log("从计算最高点-（总高度-计算高度之差)开始排列");
+
+			var dH=allH-cH;
+
+			var startP=adjust[0][1]-dH;
+				startP=startP<0?0:startP;
+
+
+				/*adjust=_.map(adjust,function(d,i){
+					d[1]=startP+i*45;
+					return d;
+				});	*/
+
+
+
+				adjust=_.each(adjust.reverse(),function(d,i,all){
+					
+					if(i==(all.length-1)){
+						return;
+					}
+
+					if(all[0][1]<(height-50)){
+						all[0][1]=height-72.50;
+					}
+
+					if((all[i][1]-all[i+1][1])<45){
+						all[i+1][1]=all[i][1]-45;
+					}
+					
+				});
+
+
+
+				adjust=_.each(adjust.reverse(),function(d,i,all){
+					
+					if(i==(all.length-1)){
+						return;
+					}
+
+					if(all[0][1]<50){
+						all[0][1]=72.50;
+					}
+
+					if((all[i+1][1]-all[i][1])<45){
+						all[i+1][1]=all[i][1]+45;
+					}
+					
+				});
+
+				
+
+
+
+
+		}
+
+}
+
+
+
+
 
 
 
 
 
 focusTooltipsShape.attr("d",function(d,i){
-	
+			adjust=_.sortBy(adjust,function(d){return d[2]});
 
 	var focusX=adjust[i][0];
 	var focusY=adjust[i][1];
-	var focusYOrigin=adjust[i][2];
+	var w=100;
+	var dx=15;
+	if(focusX>width/2){
+		w=-100;
+		dx=-15;	
+	}
+
+	var fx=adjust[i][3];
+	var fy=adjust[i][4];
+
+
+	var h=20;
 	var path=[
-				[focusX,focusYOrigin],
-				[focusX+focusTooltipsDx,focusY-10-focusTooltipsDy],
-				[focusX+focusTooltipsDx,focusY-focusTooltipsHeight-focusTooltipsDy],
-				[focusX+focusTooltipsWidth+focusTooltipsDx,focusY-focusTooltipsHeight-focusTooltipsDy],
-				[focusX+focusTooltipsWidth+focusTooltipsDx,focusY-focusTooltipsDy],
-				[focusX+focusTooltipsDx,focusY-focusTooltipsDy]
+			    [fx,fy],
+			    [focusX+dx,focusY-10],
+				[focusX+dx,focusY-h],
+				[focusX+dx+w,focusY-h],
+				[focusX+dx+w,focusY+h],
+				[focusX+dx,focusY+h],
+				[focusX+dx,focusY+h-10],
+				
 			];
 	return shapePath(path);
 });
